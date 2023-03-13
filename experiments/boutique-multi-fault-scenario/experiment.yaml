@@ -17,7 +17,6 @@ spec:
             template: pod-cpu-hog-xmv
           - name: pod-io-stress-8zn
             template: pod-io-stress-8zn
-
     - name: install-faults
       inputs:
         artifacts:
@@ -518,75 +517,75 @@ spec:
     - name: pod-memory-hog-ruy
       inputs:
         artifacts:
-            - name: pod-memory-hog-ruy
-              path: /tmp/chaosengine-pod-memory-hog-ruy.yaml
-              raw:
-                data: |
-                  apiVersion: litmuschaos.io/v1alpha1
-                  kind: ChaosEngine
-                  metadata:
-                    namespace: "{{workflow.parameters.adminModeNamespace}}"
-                    generateName: pod-memory-hog-ruy
-                    labels:
-                      instance_id: 68dbc5a6-620b-49e7-acbf-46b40ff85fc3
-                      workflow_name: pod-memory-hog-1658478266
-                  spec:
-                    engineState: active
-                    appinfo:
-                      appns: boutique
-                      applabel: app=cartservice
-                      appkind: deployment
-                    chaosServiceAccount: litmus-admin
-                    experiments:
-                      - name: pod-memory-hog
-                        spec:
-                          components:
-                            env:
-                              - name: TOTAL_CHAOS_DURATION
-                                value: "60"
-                              - name: MEMORY_CONSUMPTION
-                                value: "300"
-                              - name: PODS_AFFECTED_PERC
-                                value: ""
-                              - name: CONTAINER_RUNTIME
-                                value: 'containerd'
-                              - name: SOCKET_PATH
-                                value: '/run/containerd/containerd.sock'
-                          probe:
-                          - name: carts-resource-status-check
-                            type: cmdProbe
-                            mode: Edge
-                            runProperties:
-                              probeTimeout: 1000
-                              retry: 0
-                              interval: 1
-                              stopOnFailure: true
-                            cmdProbe/inputs:
-                              command: ./healthcheck -name pod-level
-                              source:
-                                image: chaosnative/go-runner:3.0.1-saas
-                                inheritInputs: true
-                              comparator:
-                                type: string
-                                criteria: contains
-                                value: "[P000]"
-                          - name: cart-service-availability-check
-                            type: httpProbe
-                            mode: Continuous
-                            httpProbe/inputs:
-                              url: http://frontend:80/cart
-                              insecureSkipVerify: false
-                              method:
-                                get:
-                                  criteria: ==
-                                  responseCode: "200"
-                            runProperties:
-                              probeTimeout: 2000
-                              interval: 5
-                              retry: 4
-                              probePollingInterval: 2
-                              initialDelaySeconds: 1
-                              stopOnFailure: false
+          - name: pod-memory-hog-ruy
+            path: /tmp/chaosengine-pod-memory-hog-ruy.yaml
+            raw:
+              data: |
+                apiVersion: litmuschaos.io/v1alpha1
+                kind: ChaosEngine
+                metadata:
+                  namespace: "{{workflow.parameters.adminModeNamespace}}"
+                  generateName: pod-memory-hog-ruy
+                  labels:
+                    instance_id: 68dbc5a6-620b-49e7-acbf-46b40ff85fc3
+                    workflow_name: pod-memory-hog-1658478266
+                spec:
+                  engineState: active
+                  appinfo:
+                    appns: boutique
+                    applabel: app=cartservice
+                    appkind: deployment
+                  chaosServiceAccount: litmus-admin
+                  experiments:
+                    - name: pod-memory-hog
+                      spec:
+                        components:
+                          env:
+                            - name: TOTAL_CHAOS_DURATION
+                              value: "60"
+                            - name: MEMORY_CONSUMPTION
+                              value: "300"
+                            - name: PODS_AFFECTED_PERC
+                              value: ""
+                            - name: CONTAINER_RUNTIME
+                              value: 'containerd'
+                            - name: SOCKET_PATH
+                              value: '/run/containerd/containerd.sock'
+                        probe:
+                        - name: carts-resource-status-check
+                          type: cmdProbe
+                          mode: Edge
+                          runProperties:
+                            probeTimeout: 1000
+                            retry: 0
+                            interval: 1
+                            stopOnFailure: true
+                          cmdProbe/inputs:
+                            command: ./healthcheck -name pod-level
+                            source:
+                              image: chaosnative/go-runner:3.0.1-saas
+                              inheritInputs: true
+                            comparator:
+                              type: string
+                              criteria: contains
+                              value: "[P000]"
+                        - name: cart-service-availability-check
+                          type: httpProbe
+                          mode: Continuous
+                          httpProbe/inputs:
+                            url: http://frontend:80/cart
+                            insecureSkipVerify: false
+                            method:
+                              get:
+                                criteria: ==
+                                responseCode: "200"
+                          runProperties:
+                            probeTimeout: 2000
+                            interval: 5
+                            retry: 4
+                            probePollingInterval: 2
+                            initialDelaySeconds: 1
+                            stopOnFailure: false
       metadata:
         labels:
           weight: "10"
@@ -652,6 +651,7 @@ spec:
                                 type: string
                                 criteria: contains
                                 value: "[P000]"
+      metadata:
         labels:
           weight: "10"
       container:
@@ -664,58 +664,58 @@ spec:
     - name: pod-io-stress-8zn
       inputs:
         artifacts:
-            - name: pod-io-stress-8zn
-              path: /tmp/chaosengine-pod-io-stress-8zn.yaml
-              raw:
-                data: |
-                  apiVersion: litmuschaos.io/v1alpha1
-                  kind: ChaosEngine
-                  metadata:
-                    namespace: "{{workflow.parameters.adminModeNamespace}}"
-                    generateName: pod-io-stress-8zn
-                    labels:
-                      instance_id: 271b628b-3e5e-49f9-984d-91c908be9d82
-                      workflow_name: pod-io-stress-1658478992
-                  spec:
-                    engineState: active
-                    appinfo:
-                      appns: boutique
-                      applabel: app=paymentservice
-                      appkind: deployment
-                    chaosServiceAccount: litmus-admin
-                    experiments:
-                      - name: pod-io-stress
-                        spec:
-                          components:
-                            env:
-                              - name: TOTAL_CHAOS_DURATION
-                                value: "60"
-                              - name: FILESYSTEM_UTILIZATION_PERCENTAGE
-                                value: "10"
-                              - name: PODS_AFFECTED_PERC
-                                value: ""
-                              - name: CONTAINER_RUNTIME
-                                value: 'containerd'
-                              - name: SOCKET_PATH
-                                value: '/run/containerd/containerd.sock'
-                          probe:
-                          - name: carts-resource-status-check
-                            type: cmdProbe
-                            mode: Edge
-                            runProperties:
-                              probeTimeout: 1000
-                              retry: 0
-                              interval: 1
-                              stopOnFailure: true
-                            cmdProbe/inputs:
-                              command: ./healthcheck -name pod-level
-                              source:
-                                image: chaosnative/go-runner:3.0.1-saas
-                                inheritInputs: true
-                              comparator:
-                                type: string
-                                criteria: contains
-                                value: "[P000]"
+          - name: pod-io-stress-8zn
+            path: /tmp/chaosengine-pod-io-stress-8zn.yaml
+            raw:
+              data: |
+                apiVersion: litmuschaos.io/v1alpha1
+                kind: ChaosEngine
+                metadata:
+                  namespace: "{{workflow.parameters.adminModeNamespace}}"
+                  generateName: pod-io-stress-8zn
+                  labels:
+                    instance_id: 271b628b-3e5e-49f9-984d-91c908be9d82
+                    workflow_name: pod-io-stress-1658478992
+                spec:
+                  engineState: active
+                  appinfo:
+                    appns: boutique
+                    applabel: app=paymentservice
+                    appkind: deployment
+                  chaosServiceAccount: litmus-admin
+                  experiments:
+                    - name: pod-io-stress
+                      spec:
+                        components:
+                          env:
+                            - name: TOTAL_CHAOS_DURATION
+                              value: "60"
+                            - name: FILESYSTEM_UTILIZATION_PERCENTAGE
+                              value: "10"
+                            - name: PODS_AFFECTED_PERC
+                              value: ""
+                            - name: CONTAINER_RUNTIME
+                              value: 'containerd'
+                            - name: SOCKET_PATH
+                              value: '/run/containerd/containerd.sock'
+                        probe:
+                        - name: carts-resource-status-check
+                          type: cmdProbe
+                          mode: Edge
+                          runProperties:
+                            probeTimeout: 1000
+                            retry: 0
+                            interval: 1
+                            stopOnFailure: true
+                          cmdProbe/inputs:
+                            command: ./healthcheck -name pod-level
+                            source:
+                              image: chaosnative/go-runner:3.0.1-saas
+                              inheritInputs: true
+                            comparator:
+                              type: string
+                              criteria: contains
+                              value: "[P000]"
       metadata:
         labels:
           weight: "10"
