@@ -1,15 +1,14 @@
 apiVersion: litmuchaos.io/v1alpha1
 kind: ChartServiceVersion
 metadata:
-  name: boutique-parallel-faults
-  version: 0.1.0
+  name: boutique-multi-fault-scenario
   annotations:
     categories: kubernetes
-    chartDescription: Injects network latency, cpu stress and pod-delete faults into the target application
+    chartDescription: Illustrate execution of complex scenario involving multi-component chaos on carts, payments, ad services
 spec:
-  displayName: Boutique Parallel Faults
+  displayName: Boutique Multi Fault Scenario
   categoryDescription: >
-    Injects network latency, cpu stress and pod-delete faults into the target application
+    Illustrate execution of complex scenario involving multi-component chaos on carts, payments, ad services
   faults:
     - name: pod-network-latency
       description: Injects pod network latency on pod(s) identified by the specified label

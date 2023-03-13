@@ -1,15 +1,14 @@
 apiVersion: litmuchaos.io/v1alpha1
 kind: ChartServiceVersion
 metadata:
-  name: boutique-cpu-hog
-  version: 0.1.0
+  name: boutique-carts-cpu-starvation
   annotations:
-    categories: boutique-cpu-hog
-    chartDescription: Injects CPU hog (resource exhaustion) on pod(s) identified by specified labels
+    categories: boutique-carts-cpu-starvation
+    chartDescription: Hog resources and deprive carts service of cpu cycles and verify app behaviour
 spec:
-  displayName: Boutique CPU Hog
+  displayName: Boutique Carts CPU Starvation
   categoryDescription: >
-    Injects CPU hog (resource exhaustion) on pod(s) identified by specified labels
+    Hog resources and deprive carts service of cpu cycles and verify app behaviour
   faults:
     - name: pod-cpu-hog
       description: Injects CPU hog (resource exhaustion) on pod(s) identified by specified labels

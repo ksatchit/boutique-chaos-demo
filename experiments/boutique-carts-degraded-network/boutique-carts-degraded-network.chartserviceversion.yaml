@@ -1,15 +1,14 @@
 apiVersion: litmuchaos.io/v1alpha1
 kind: ChartServiceVersion
 metadata:
-  name: boutique-network-latency
-  version: 0.1.0
+  name: boutique-carts-degraded-network
   annotations:
-    categories: boutique-network-latency
-    chartDescription: Injects network latency on pod(s) identified by the specified labels
+    categories: boutique-carts-degraded-network
+    chartDescription: Inject network degradation to carts service and verify user impact
 spec:
-  displayName: Boutique Network Latency
+  displayName: Boutique Carts Degraded Network
   categoryDescription: >
-    Injects network latency on pod(s) identified by the specified labels
+    Inject network degradation to carts service and verify user impact
   faults:
     - name: pod-network-latency
       description: Injects network latency on pod(s) identified by the specified labels

@@ -1,11 +1,10 @@
 kind: Workflow
 apiVersion: argoproj.io/v1alpha1
 metadata:
-  name: boutique-cart-network-latency-1658834015
+  name: boutique-carts-degraded-network-1658834015
   namespace: hce
-  creationTimestamp: null
   labels:
-    subject: boutique-cart-network-latency
+    subject: boutique-carts-degraded-network
 spec:
   templates:
     - name: custom-chaos
@@ -14,8 +13,6 @@ spec:
             template: install-chaos-faults
         - - name: pod-network-latency-he9
             template: pod-network-latency-he9
-        - - name: cleanup-chaos-resources
-            template: cleanup-chaos-resources
     - name: install-chaos-faults
       inputs:
         artifacts:
@@ -237,7 +234,7 @@ spec:
                             - name: PODS_AFFECTED_PERC
                               value: ""
                         probe:
-                          - name: cart-pods-check
+                          - name: carts-resource-status-check
                             type: cmdProbe
                             mode: Edge
                             runProperties:
@@ -254,11 +251,11 @@ spec:
                                 type: string
                                 criteria: contains
                                 value: "[P000]"
-                          - name: cart-svc-availability-check
+                          - name: cart-service-availability-check
                             type: httpProbe
                             mode: Continuous
                             httpProbe/inputs:
-                              url: http://frontend.boutique.svc.cluster.local:80/cart
+                              url: http://frontend:80/cart
                               insecureSkipVerify: false
                               method:
                                 get:

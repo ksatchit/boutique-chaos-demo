@@ -1,39 +1,36 @@
 kind: Workflow
 apiVersion: argoproj.io/v1alpha1
 metadata:
-  name: boutique-cart-pod-delete-1657185180
+  name: boutique-carts-cpu-starvation-1658477155
   namespace: hce
-  creationTimestamp: null
   labels:
-    subject: boutique-cart-pod-delete
+    subject: boutique-carts-cpu-starvation
 spec:
   templates:
     - name: custom-chaos
       steps:
         - - name: install-chaos-faults
             template: install-chaos-faults
-        - - name: pod-delete-o2z
-            template: pod-delete-o2z
-        - - name: cleanup-chaos-resources
-            template: cleanup-chaos-resources
+        - - name: pod-cpu-hog-wmv
+            template: pod-cpu-hog-wmv
     - name: install-chaos-faults
       inputs:
         artifacts:
-          - name: pod-delete-o2z
-            path: /tmp/pod-delete-o2z.yaml
+          - name: pod-cpu-hog-wmv
+            path: /tmp/pod-cpu-hog-wmv.yaml
             raw:
               data: >
                 apiVersion: litmuschaos.io/v1alpha1
 
                 description:
                   message: |
-                    Deletes a pod belonging to a deployment/statefulset/daemonset
+                    Injects CPU consumption on pods belonging to an app deployment
                 kind: ChaosExperiment
 
                 metadata:
-                  name: pod-delete
+                  name: pod-cpu-hog
                   labels:
-                    name: pod-delete
+                    name: pod-cpu-hog
                     app.kubernetes.io/part-of: litmus
                     app.kubernetes.io/component: chaosexperiment
                     app.kubernetes.io/version: ci
@@ -144,20 +141,28 @@ spec:
                     imagePullPolicy: Always
                     args:
                       - -c
-                      - ./experiments -name pod-delete
+                      - ./experiments -name pod-cpu-hog
                     command:
                       - /bin/bash
                     env:
                       - name: TOTAL_CHAOS_DURATION
-                        value: "15"
-                      - name: RAMP_TIME
-                        value: ""
-                      - name: FORCE
-                        value: "true"
-                      - name: CHAOS_INTERVAL
-                        value: "5"
+                        value: "60"
+                      - name: CPU_CORES
+                        value: "1"
+                      - name: CPU_LOAD
+                        value: "100"
                       - name: PODS_AFFECTED_PERC
+                        value: ""
+                      - name: RAMP_TIME
                         value: "" 
+                      - name: LIB_IMAGE
+                        value: chaosnative/go-runner:3.0.1-saas
+                      - name: CONTAINER_RUNTIME
+                        value: 'containerd'
+                      - name: SOCKET_PATH
+                        value: '/run/containerd/containerd.sock'
+                      - name: DEFAULT_HEALTH_CHECK
+                        value: 'false'
                       - name: TARGET_PODS
                         value: ""
                       - name: TARGET_CONTAINER
@@ -166,59 +171,61 @@ spec:
                         value: ""
                       - name: SEQUENCE
                         value: parallel
-                      - name: DEFAULT_HEALTH_CHECK
-                        value: 'false'
                     labels:
-                      name: pod-delete
+                      name: pod-cpu-hog
                       app.kubernetes.io/part-of: litmus
                       app.kubernetes.io/component: experiment-job
+                      app.kubernetes.io/runtime-api-usage: "true"
                       app.kubernetes.io/version: ci
       container:
         name: ""
-        image: litmuschaos/k8s:2.13.0
+        image: docker.io/chaosnative/k8s:2.13.0
         command:
           - sh
           - -c
         args:
-          - kubectl apply -f /tmp/pod-delete-o2z.yaml -n
+          - kubectl apply -f /tmp/pod-cpu-hog-wmv.yaml -n
             {{workflow.parameters.adminModeNamespace}} && sleep 30
-    - name: pod-delete-o2z
+
+    - name: pod-cpu-hog-wmv
       inputs:
         artifacts:
-          - name: pod-delete-o2z
-            path: /tmp/chaosengine-pod-delete-o2z.yaml
+          - name: pod-cpu-hog-wmv
+            path: /tmp/chaosengine-pod-cpu-hog-wmv.yaml
             raw:
               data: |
                 apiVersion: litmuschaos.io/v1alpha1
                 kind: ChaosEngine
                 metadata:
                   namespace: "{{workflow.parameters.adminModeNamespace}}"
-                  generateName: pod-delete-o2z
+                  generateName: pod-cpu-hog-wmv
                   labels:
-                    instance_id: 2760c483-64b6-4b65-a70d-368b72e7549b
-                    workflow_name: custom-chaos-workflow-1657185180
+                    instance_id: fd6491b4-acf1-4225-805c-a8926b172080
+                    workflow_name: pod-cpu-hog-1658477155
                 spec:
+                  engineState: active
                   appinfo:
                     appns: boutique
                     applabel: app=cartservice
                     appkind: deployment
-                  engineState: active
                   chaosServiceAccount: litmus-admin
                   experiments:
-                    - name: pod-delete
+                    - name: pod-cpu-hog
                       spec:
                         components:
                           env:
                             - name: TOTAL_CHAOS_DURATION
-                              value: "30"
-                            - name: CHAOS_INTERVAL
-                              value: "10"
-                            - name: FORCE
-                              value: "false"
+                              value: "60"
+                            - name: CPU_CORES
+                              value: "1"
                             - name: PODS_AFFECTED_PERC
                               value: ""
+                            - name: CONTAINER_RUNTIME
+                              value: 'containerd'
+                            - name: SOCKET_PATH
+                              value: '/run/containerd/containerd.sock'
                         probe:
-                          - name: cart-pods-check
+                          - name: carts-resource-status-check
                             type: cmdProbe
                             mode: Edge
                             runProperties:
@@ -235,11 +242,11 @@ spec:
                                 type: string
                                 criteria: contains
                                 value: "[P000]"
-                          - name: cart-svc-availability-check
+                          - name: cart-service-availability-check
                             type: httpProbe
                             mode: Continuous
                             httpProbe/inputs:
-                              url: http://frontend.boutique.svc.cluster.local:80/cart
+                              url: http://frontend:80/cart
                               insecureSkipVerify: false
                               method:
                                 get:
@@ -274,20 +281,20 @@ spec:
           weight: "10"
       container:
         name: ""
-        image: litmuschaos/litmus-checker:2.13.0
+        image: docker.io/chaosnative/litmus-checker:2.13.0
         args:
-          - -file=/tmp/chaosengine-pod-delete-o2z.yaml
+          - -file=/tmp/chaosengine-pod-cpu-hog-wmv.yaml
           - -saveName=/tmp/engine-name
     - name: cleanup-chaos-resources
       container:
         name: ""
-        image: litmuschaos/k8s:latest
+        image: docker.io/chaosnative/k8s:latest
         command:
           - sh
           - -c
         args:
           - "kubectl delete chaosengine -l 'instance_id in
-            (2760c483-64b6-4b65-a70d-368b72e7549b, )' -n
+            (fd6491b4-acf1-4225-805c-a8926b172080, )' -n
             {{workflow.parameters.adminModeNamespace}} "
   entrypoint: custom-chaos
   arguments:
@@ -300,3 +307,6 @@ spec:
   securityContext:
     runAsUser: 1000
     runAsNonRoot: true
+status:
+  ? startedAt
+  ? finishedAt
