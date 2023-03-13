@@ -13,10 +13,10 @@ spec:
             template: install-faults
         - - name: pod-memory-hog-ruy
             template: pod-memory-hog-ruy
-#          - name: pod-cpu-hog-xmv
-#            template: pod-cpu-hog-xmv
-#          - name: pod-io-stress-8zn
-#            template: pod-io-stress-8zn
+          - name: pod-cpu-hog-xmv
+            template: pod-cpu-hog-xmv
+          - name: pod-io-stress-8zn
+            template: pod-io-stress-8zn
     - name: install-faults
       inputs:
         artifacts:
@@ -551,40 +551,40 @@ spec:
                             - name: SOCKET_PATH
                               value: '/run/containerd/containerd.sock'
                         probe:
-                        - name: carts-resource-status-check
-                          type: cmdProbe
-                          mode: Edge
-                          runProperties:
-                            probeTimeout: 1000
-                            retry: 0
-                            interval: 1
-                            stopOnFailure: true
-                          cmdProbe/inputs:
-                            command: ./healthcheck -name pod-level
-                            source:
-                              image: chaosnative/go-runner:3.0.1-saas
-                              inheritInputs: true
-                            comparator:
-                              type: string
-                              criteria: contains
-                              value: "[P000]"
-                        - name: cart-service-availability-check
-                          type: httpProbe
-                          mode: Continuous
-                          httpProbe/inputs:
-                            url: http://frontend:80/cart
-                            insecureSkipVerify: false
-                            method:
-                              get:
-                                criteria: ==
-                                responseCode: "200"
-                          runProperties:
-                            probeTimeout: 2000
-                            interval: 5
-                            retry: 4
-                            probePollingInterval: 2
-                            initialDelaySeconds: 1
-                            stopOnFailure: false
+                          - name: carts-resource-status-check
+                            type: cmdProbe
+                            mode: Edge
+                            runProperties:
+                              probeTimeout: 1000
+                              retry: 0
+                              interval: 1
+                              stopOnFailure: true
+                            cmdProbe/inputs:
+                              command: ./healthcheck -name pod-level
+                              source:
+                                image: chaosnative/go-runner:3.0.1-saas
+                                inheritInputs: true
+                              comparator:
+                                type: string
+                                criteria: contains
+                                value: "[P000]"
+                          - name: cart-service-availability-check
+                            type: httpProbe
+                            mode: Continuous
+                            httpProbe/inputs:
+                              url: http://frontend:80/cart
+                              insecureSkipVerify: false
+                              method:
+                                get:
+                                  criteria: ==
+                                  responseCode: "200"
+                            runProperties:
+                              probeTimeout: 2000
+                              interval: 5
+                              retry: 4
+                              probePollingInterval: 2
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
       metadata:
         labels:
           weight: "10"
@@ -698,23 +698,23 @@ spec:
                             - name: SOCKET_PATH
                               value: '/run/containerd/containerd.sock'
                         probe:
-                        - name: carts-resource-status-check
-                          type: cmdProbe
-                          mode: Edge
-                          runProperties:
-                            probeTimeout: 1000
-                            retry: 0
-                            interval: 1
-                            stopOnFailure: true
-                          cmdProbe/inputs:
-                            command: ./healthcheck -name pod-level
-                            source:
-                              image: chaosnative/go-runner:3.0.1-saas
-                              inheritInputs: true
-                            comparator:
-                              type: string
-                              criteria: contains
-                              value: "[P000]"
+                          - name: carts-resource-status-check
+                            type: cmdProbe
+                            mode: Edge
+                            runProperties:
+                              probeTimeout: 1000
+                              retry: 0
+                              interval: 1
+                              stopOnFailure: true
+                            cmdProbe/inputs:
+                              command: ./healthcheck -name pod-level
+                              source:
+                                image: chaosnative/go-runner:3.0.1-saas
+                                inheritInputs: true
+                              comparator:
+                                type: string
+                                criteria: contains
+                                value: "[P000]"
       metadata:
         labels:
           weight: "10"
