@@ -13,10 +13,10 @@ spec:
             template: install-faults
         - - name: pod-memory-hog-ruy
             template: pod-memory-hog-ruy
-          - name: pod-cpu-hog-xmv
-            template: pod-cpu-hog-xmv
-          - name: pod-io-stress-8zn
-            template: pod-io-stress-8zn
+#          - name: pod-cpu-hog-xmv
+#            template: pod-cpu-hog-xmv
+#          - name: pod-io-stress-8zn
+#            template: pod-io-stress-8zn
     - name: install-faults
       inputs:
         artifacts:
@@ -511,8 +511,7 @@ spec:
           - sh
           - -c
         args:
-          - kubectl apply -f /tmp/pod-io-stress-8zn.yaml -n
-            {{workflow.parameters.adminModeNamespace}} && sleep 30
+          - kubectl apply -f /tmp -n {{workflow.parameters.adminModeNamespace}} && sleep 30
 
     - name: pod-memory-hog-ruy
       inputs:
