@@ -1,0 +1,11 @@
+packageName: kubernetes
+faults:
+  - name: pod-delete
+    CSV: pod-delete.chartserviceversion.yaml
+    desc: "pod-delete"
+  - name: pod-network-latency
+    CSV: pod-network-latency.chartserviceversion.yaml
+    desc: "pod-network-latency"
+  - name: pod-cpu-hog
+    CSV: pod-cpu-hog.chartserviceversion.yaml
+    desc: "pod-cpu-hog"

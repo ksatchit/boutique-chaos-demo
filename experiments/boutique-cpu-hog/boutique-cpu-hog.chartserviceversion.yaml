@@ -1,0 +1,32 @@
+apiVersion: litmuchaos.io/v1alpha1
+kind: ChartServiceVersion
+metadata:
+  name: boutique-cpu-hog
+  version: 0.1.0
+  annotations:
+    categories: boutique-cpu-hog
+    chartDescription: Injects CPU hog (resource exhaustion) on pod(s) identified by specified labels
+spec:
+  displayName: Boutique CPU Hog
+  categoryDescription: >
+    Injects CPU hog (resource exhaustion) on pod(s) identified by specified labels
+  faults:
+    - name: pod-cpu-hog
+      description: Injects CPU hog (resource exhaustion) on pod(s) identified by specified labels
+  keywords:
+    - Kubernetes
+  platforms:
+    - GKE
+    - Packet(Kubeadm)
+    - Minikube
+    - EKS
+    - AKS
+    - Kind
+  links:
+    - name: Kubernetes Slack
+      url: https://slack.kubernetes.io/
+    - name: Documentation
+      url: https://docs.litmuschaos.io/docs/chaoshub/#generic-chaos
+  icon:
+    - url:
+      mediatype: ""

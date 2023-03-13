@@ -1,0 +1,30 @@
+apiVersion: litmuchaos.io/v1alpha1
+kind: ChartServiceVersion
+metadata:
+  name: boutique-parallel-faults
+  version: 0.1.0
+  annotations:
+    categories: kubernetes
+    chartDescription: Injects network latency, cpu stress and pod-delete faults into the target application
+spec:
+  displayName: Boutique Parallel Faults
+  categoryDescription: >
+    Injects network latency, cpu stress and pod-delete faults into the target application
+  faults:
+    - name: pod-network-latency
+      description: Injects pod network latency on pod(s) identified by the specified label
+    - name: pod-cpu-hog
+      description: Injects pod cpu stress on pod(s) identified by the specified label
+    - name: pod-delete
+      description: Injects pod deletion on pod(s) identified by the specified label
+  keywords:
+    - Kubernetes
+  platforms:
+    - GKE
+    - Minikube 
+    - Packet(Kubeadm)
+    - EKS
+    - AKS
+  icon:
+    - url:
+      mediatype: ""

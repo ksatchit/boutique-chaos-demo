@@ -1,0 +1,26 @@
+apiVersion: litmuchaos.io/v1alpha1
+kind: ChartServiceVersion
+metadata:
+  name: boutique-pod-delete
+  version: 0.1.0
+  annotations:
+    categories: boutique-pod-delete
+    chartDescription: Injects pod deletion on pod(s) identified by the specified label
+spec:
+  displayName: Boutique Pod Delete
+  categoryDescription: >
+    Injects pod deletion on pod(s) identified by the specified label
+  faults:
+    - name: pod-delete
+      description: Injects pod deletion on pod(s) identified by the specified label
+  keywords:
+    - Kubernetes
+  platforms:
+    - GKE
+    - Minikube 
+    - Packet(Kubeadm)
+    - EKS
+    - AKS
+  icon:
+    - url:
+      mediatype: ""

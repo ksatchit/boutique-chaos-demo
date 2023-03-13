@@ -1,0 +1,863 @@
+kind: Workflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: boutique-cart-parallel-faults-1657185180
+  namespace: hce
+  creationTimestamp: null
+  labels:
+    subject: boutique-cart-parallel-faults
+spec:
+  templates:
+    - name: custom-chaos
+      steps:
+        - - name: pod-network-latency-experiment
+            template: pod-network-latency-experiment
+          - name: pod-cpu-hog-experiment
+            template: pod-cpu-hog-experiment
+          - name: pod-delete-experiment
+            template: pod-delete-experiment
+        - - name: pod-network-latency-ie9
+            template: pod-network-latency-ie9
+          - name: pod-cpu-hog-xmv
+            template: pod-cpu-hog-xmv
+        - - name: pod-delete-p2z
+            template: pod-delete-p2z
+        - - name: cleanup-chaos-resources
+            template: cleanup-chaos-resources
+    - name: pod-network-latency-experiment
+      inputs:
+        artifacts:
+          - name: pod-network-latency-he9
+            path: /tmp/pod-network-latency-he9.yaml
+            raw:
+              data: >
+                apiVersion: litmuschaos.io/v1alpha1
+
+                description:
+                  message: |
+                    Injects network latency on pods belonging to an app deployment
+                kind: ChaosExperiment
+
+                metadata:
+                  name: pod-network-latency
+                  labels:
+                    name: pod-network-latency
+                    app.kubernetes.io/part-of: litmus
+                    app.kubernetes.io/component: chaosexperiment
+                    app.kubernetes.io/version: ci
+                spec:
+                  definition:
+                    scope: Namespaced
+                    permissions:
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods
+                        verbs:
+                          - create
+                          - delete
+                          - get
+                          - list
+                          - patch
+                          - update
+                          - deletecollection
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - events
+                        verbs:
+                          - create
+                          - get
+                          - list
+                          - patch
+                          - update
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - configmaps
+                        verbs:
+                          - get
+                          - list
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods/log
+                        verbs:
+                          - get
+                          - list
+                          - watch
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods/exec
+                        verbs:
+                          - get
+                          - list
+                          - create
+                      - apiGroups:
+                          - apps
+                        resources:
+                          - deployments
+                          - statefulsets
+                          - replicasets
+                          - daemonsets
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - apps.openshift.io
+                        resources:
+                          - deploymentconfigs
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - replicationcontrollers
+                        verbs:
+                          - get
+                          - list
+                      - apiGroups:
+                          - argoproj.io
+                        resources:
+                          - rollouts
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - batch
+                        resources:
+                          - jobs
+                        verbs:
+                          - create
+                          - list
+                          - get
+                          - delete
+                          - deletecollection
+                      - apiGroups:
+                          - litmuschaos.io
+                        resources:
+                          - chaosengines
+                          - chaosexperiments
+                          - chaosresults
+                        verbs:
+                          - create
+                          - list
+                          - get
+                          - patch
+                          - update
+                          - delete
+                    image: chaosnative/go-runner:3.0.1-saas
+                    imagePullPolicy: Always
+                    args:
+                      - -c
+                      - ./experiments -name pod-network-latency
+                    command:
+                      - /bin/bash
+                    env:
+                      - name: TARGET_CONTAINER
+                        value: ""
+                      - name: NETWORK_INTERFACE
+                        value: eth0
+                      - name: LIB_IMAGE
+                        value: chaosnative/go-runner:3.0.1-saas
+                      - name: NETWORK_LATENCY
+                        value: "2000"
+                      - name: TOTAL_CHAOS_DURATION
+                        value: "60"
+                      - name: RAMP_TIME
+                        value: ""
+                      - name: JITTER
+                        value: "0" 
+                      - name: PODS_AFFECTED_PERC
+                        value: ""
+                      - name: TARGET_PODS
+                        value: ""
+                      - name: CONTAINER_RUNTIME
+                        value: 'containerd'
+                      - name: DEFAULT_HEALTH_CHECK
+                        value: 'false'
+                      - name: DESTINATION_IPS
+                        value: ""
+                      - name: DESTINATION_HOSTS
+                        value: ""
+                      - name: SOCKET_PATH
+                        value: '/run/containerd/containerd.sock'
+                      - name: NODE_LABEL
+                        value: ""
+                      - name: SEQUENCE
+                        value: parallel
+                    labels:
+                      name: pod-network-latency
+                      app.kubernetes.io/part-of: litmus
+                      app.kubernetes.io/component: experiment-job
+                      app.kubernetes.io/runtime-api-usage: "true"
+                      app.kubernetes.io/version: ci
+      container:
+        name: ""
+        image: docker.io/chaosnative/k8s:2.13.0
+        command:
+          - sh
+          - -c
+        args:
+          - kubectl apply -f /tmp/pod-network-latency-he9.yaml -n
+            {{workflow.parameters.adminModeNamespace}} && sleep 30
+
+    - name: pod-cpu-hog-experiment
+      inputs:
+        artifacts:
+          - name: pod-cpu-hog-wmv
+            path: /tmp/pod-cpu-hog-wmv.yaml
+            raw:
+              data: >
+                apiVersion: litmuschaos.io/v1alpha1
+
+                description:
+                  message: |
+                    Injects CPU consumption on pods belonging to an app deployment
+                kind: ChaosExperiment
+
+                metadata:
+                  name: pod-cpu-hog
+                  labels:
+                    name: pod-cpu-hog
+                    app.kubernetes.io/part-of: litmus
+                    app.kubernetes.io/component: chaosexperiment
+                    app.kubernetes.io/version: ci
+                spec:
+                  definition:
+                    scope: Namespaced
+                    permissions:
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods
+                        verbs:
+                          - create
+                          - delete
+                          - get
+                          - list
+                          - patch
+                          - update
+                          - deletecollection
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - events
+                        verbs:
+                          - create
+                          - get
+                          - list
+                          - patch
+                          - update
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - configmaps
+                        verbs:
+                          - get
+                          - list
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods/log
+                        verbs:
+                          - get
+                          - list
+                          - watch
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods/exec
+                        verbs:
+                          - get
+                          - list
+                          - create
+                      - apiGroups:
+                          - apps
+                        resources:
+                          - deployments
+                          - statefulsets
+                          - replicasets
+                          - daemonsets
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - apps.openshift.io
+                        resources:
+                          - deploymentconfigs
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - replicationcontrollers
+                        verbs:
+                          - get
+                          - list
+                      - apiGroups:
+                          - argoproj.io
+                        resources:
+                          - rollouts
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - batch
+                        resources:
+                          - jobs
+                        verbs:
+                          - create
+                          - list
+                          - get
+                          - delete
+                          - deletecollection
+                      - apiGroups:
+                          - litmuschaos.io
+                        resources:
+                          - chaosengines
+                          - chaosexperiments
+                          - chaosresults
+                        verbs:
+                          - create
+                          - list
+                          - get
+                          - patch
+                          - update
+                          - delete
+                    image: chaosnative/go-runner:3.0.1-saas
+                    imagePullPolicy: Always
+                    args:
+                      - -c
+                      - ./experiments -name pod-cpu-hog
+                    command:
+                      - /bin/bash
+                    env:
+                      - name: TOTAL_CHAOS_DURATION
+                        value: "60"
+                      - name: CPU_CORES
+                        value: "1"
+                      - name: CPU_LOAD
+                        value: "100"
+                      - name: PODS_AFFECTED_PERC
+                        value: ""
+                      - name: RAMP_TIME
+                        value: "" 
+                      - name: LIB_IMAGE
+                        value: chaosnative/go-runner:3.0.1-saas
+                      - name: CONTAINER_RUNTIME
+                        value: 'containerd'
+                      - name: SOCKET_PATH
+                        value: '/run/containerd/containerd.sock'
+                      - name: DEFAULT_HEALTH_CHECK
+                        value: 'false'
+                      - name: TARGET_PODS
+                        value: ""
+                      - name: TARGET_CONTAINER
+                        value: ''
+                      - name: NODE_LABEL
+                        value: ""
+                      - name: SEQUENCE
+                        value: parallel
+                    labels:
+                      name: pod-cpu-hog
+                      app.kubernetes.io/part-of: litmus
+                      app.kubernetes.io/component: experiment-job
+                      app.kubernetes.io/runtime-api-usage: "true"
+                      app.kubernetes.io/version: ci
+      container:
+        name: ""
+        image: docker.io/chaosnative/k8s:2.13.0
+        command:
+          - sh
+          - -c
+        args:
+          - kubectl apply -f /tmp/pod-cpu-hog-wmv.yaml -n
+            {{workflow.parameters.adminModeNamespace}} && sleep 30
+    - name: pod-delete-experiment
+      inputs:
+        artifacts:
+          - name: pod-delete-p2z
+            path: /tmp/pod-delete-p2z.yaml
+            raw:
+              data: >
+                apiVersion: litmuschaos.io/v1alpha1
+
+                description:
+                  message: |
+                    Deletes a pod belonging to a deployment/statefulset/daemonset
+                kind: ChaosExperiment
+
+                metadata:
+                  name: pod-delete
+                  labels:
+                    name: pod-delete
+                    app.kubernetes.io/part-of: litmus
+                    app.kubernetes.io/component: chaosexperiment
+                    app.kubernetes.io/version: ci
+                spec:
+                  definition:
+                    scope: Namespaced
+                    permissions:
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods
+                        verbs:
+                          - create
+                          - delete
+                          - get
+                          - list
+                          - patch
+                          - update
+                          - deletecollection
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - events
+                        verbs:
+                          - create
+                          - get
+                          - list
+                          - patch
+                          - update
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - configmaps
+                        verbs:
+                          - get
+                          - list
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods/log
+                        verbs:
+                          - get
+                          - list
+                          - watch
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - pods/exec
+                        verbs:
+                          - get
+                          - list
+                          - create
+                      - apiGroups:
+                          - apps
+                        resources:
+                          - deployments
+                          - statefulsets
+                          - replicasets
+                          - daemonsets
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - apps.openshift.io
+                        resources:
+                          - deploymentconfigs
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - ""
+                        resources:
+                          - replicationcontrollers
+                        verbs:
+                          - get
+                          - list
+                      - apiGroups:
+                          - argoproj.io
+                        resources:
+                          - rollouts
+                        verbs:
+                          - list
+                          - get
+                      - apiGroups:
+                          - batch
+                        resources:
+                          - jobs
+                        verbs:
+                          - create
+                          - list
+                          - get
+                          - delete
+                          - deletecollection
+                      - apiGroups:
+                          - litmuschaos.io
+                        resources:
+                          - chaosengines
+                          - chaosexperiments
+                          - chaosresults
+                        verbs:
+                          - create
+                          - list
+                          - get
+                          - patch
+                          - update
+                          - delete
+                    image: chaosnative/go-runner:3.0.1-saas
+                    imagePullPolicy: Always
+                    args:
+                      - -c
+                      - ./experiments -name pod-delete
+                    command:
+                      - /bin/bash
+                    env:
+                      - name: TOTAL_CHAOS_DURATION
+                        value: "15"
+                      - name: RAMP_TIME
+                        value: ""
+                      - name: FORCE
+                        value: "true"
+                      - name: CHAOS_INTERVAL
+                        value: "5"
+                      - name: PODS_AFFECTED_PERC
+                        value: "" 
+                      - name: TARGET_PODS
+                        value: ""
+                      - name: TARGET_CONTAINER
+                        value: ''
+                      - name: NODE_LABEL
+                        value: ""
+                      - name: SEQUENCE
+                        value: parallel
+                      - name: DEFAULT_HEALTH_CHECK
+                        value: 'false'
+                    labels:
+                      name: pod-delete
+                      app.kubernetes.io/part-of: litmus
+                      app.kubernetes.io/component: experiment-job
+                      app.kubernetes.io/version: ci
+      container:
+        name: ""
+        image: litmuschaos/k8s:2.13.0
+        command:
+          - sh
+          - -c
+        args:
+          - kubectl apply -f /tmp/pod-delete-o2z.yaml -n
+            {{workflow.parameters.adminModeNamespace}} && sleep 30
+
+    - name: pod-network-latency-ie9
+      inputs:
+        artifacts:
+          - name: pod-network-latency-ie9
+            path: /tmp/chaosengine-pod-network-latency-ie9.yaml
+            raw:
+              data: |
+                apiVersion: litmuschaos.io/v1alpha1
+                kind: ChaosEngine
+                metadata:
+                  namespace: "{{workflow.parameters.adminModeNamespace}}"
+                  generateName: pod-network-latency-he9
+                  labels:
+                    instance_id: 79ac430b-034f-42f0-a7d1-d3bb5209b85d
+                    workflow_name: pod-network-latency-1658834015
+                spec:
+                  engineState: active
+                  appinfo:
+                    appns: boutique
+                    applabel: app=cartservice
+                    appkind: deployment
+                  chaosServiceAccount: litmus-admin
+                  experiments:
+                    - name: pod-network-latency
+                      spec:
+                        components:
+                          env:
+                            - name: TOTAL_CHAOS_DURATION
+                              value: "60"
+                            - name: NETWORK_LATENCY
+                              value: "2000"
+                            - name: JITTER
+                              value: "0"
+                            - name: CONTAINER_RUNTIME
+                              value: 'containerd'
+                            - name: SOCKET_PATH
+                              value: '/run/containerd/containerd.sock'
+                            - name: PODS_AFFECTED_PERC
+                              value: ""
+                        probe:
+                          - name: cart-pods-check
+                            type: cmdProbe
+                            mode: Edge
+                            runProperties:
+                              probeTimeout: 1000
+                              retry: 0
+                              interval: 1
+                              stopOnFailure: true
+                            cmdProbe/inputs:
+                              command: ./healthcheck -name pod-level
+                              source:
+                                image: chaosnative/go-runner:3.0.1-saas
+                                inheritInputs: true
+                              comparator:
+                                type: string
+                                criteria: contains
+                                value: "[P000]"
+                          - name: cart-svc-availability-check
+                            type: httpProbe
+                            mode: Continuous
+                            httpProbe/inputs:
+                              url: http://frontend.boutique.svc.cluster.local:80/cart
+                              insecureSkipVerify: false
+                              method:
+                                get:
+                                  criteria: ==
+                                  responseCode: "200"
+                            runProperties:
+                              probeTimeout: 2000
+                              interval: 5
+                              retry: 4
+                              probePollingInterval: 2
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
+                          - name: website-latency-check
+                            type: promProbe
+                            mode: Edge
+                            promProbe/inputs:
+                              endpoint: http://prometheus-k8s:9090
+                              query: avg_over_time(probe_duration_seconds{job=\"prometheus-blackbox-exporter\"}[60s:1s])*1000
+                              comparator:
+                                type: float
+                                criteria: <=
+                                value: "120"
+                            runProperties:
+                              probeTimeout: 5
+                              interval: 2
+                              retry: 2
+                              probePollingInterval: 1
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
+      metadata:
+        labels:
+          weight: "10"
+      container:
+        name: ""
+        image: docker.io/chaosnative/litmus-checker:2.13.0
+        args:
+          - -file=/tmp/chaosengine-pod-network-latency-ie9.yaml
+          - -saveName=/tmp/engine-name
+
+    - name: pod-cpu-hog-xmv
+      inputs:
+        artifacts:
+          - name: pod-cpu-hog-xmv
+            path: /tmp/chaosengine-pod-cpu-hog-xmv.yaml
+            raw:
+              data: |
+                apiVersion: litmuschaos.io/v1alpha1
+                kind: ChaosEngine
+                metadata:
+                  namespace: "{{workflow.parameters.adminModeNamespace}}"
+                  generateName: pod-cpu-hog-wmv
+                  labels:
+                    instance_id: fd6491b4-acf1-4225-805c-a8926b172080
+                    workflow_name: pod-cpu-hog-1658477155
+                spec:
+                  engineState: active
+                  appinfo:
+                    appns: boutique
+                    applabel: app=cartservice
+                    appkind: deployment
+                  chaosServiceAccount: litmus-admin
+                  experiments:
+                    - name: pod-cpu-hog
+                      spec:
+                        components:
+                          env:
+                            - name: TOTAL_CHAOS_DURATION
+                              value: "60"
+                            - name: CPU_CORES
+                              value: "1"
+                            - name: PODS_AFFECTED_PERC
+                              value: ""
+                            - name: CONTAINER_RUNTIME
+                              value: 'containerd'
+                            - name: SOCKET_PATH
+                              value: '/run/containerd/containerd.sock'
+                        probe:
+                          - name: cart-pods-check
+                            type: cmdProbe
+                            mode: Edge
+                            runProperties:
+                              probeTimeout: 1000
+                              retry: 0
+                              interval: 1
+                              stopOnFailure: true
+                            cmdProbe/inputs:
+                              command: ./healthcheck -name pod-level
+                              source:
+                                image: chaosnative/go-runner:3.0.1-saas
+                                inheritInputs: true
+                              comparator:
+                                type: string
+                                criteria: contains
+                                value: "[P000]"
+                          - name: cart-svc-availability-check
+                            type: httpProbe
+                            mode: Continuous
+                            httpProbe/inputs:
+                              url: http://frontend.boutique.svc.cluster.local:80/cart
+                              insecureSkipVerify: false
+                              method:
+                                get:
+                                  criteria: ==
+                                  responseCode: "200"
+                            runProperties:
+                              probeTimeout: 2000
+                              interval: 5
+                              retry: 4
+                              probePollingInterval: 2
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
+                          - name: website-latency-check
+                            type: promProbe
+                            mode: Edge
+                            promProbe/inputs:
+                              endpoint: http://prometheus-k8s:9090
+                              query: avg_over_time(probe_duration_seconds{job=\"prometheus-blackbox-exporter\"}[60s:1s])*1000
+                              comparator:
+                                type: float
+                                criteria: <=
+                                value: "120"
+                            runProperties:
+                              probeTimeout: 5
+                              interval: 2
+                              retry: 2
+                              probePollingInterval: 1
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
+        labels:
+          weight: "10"
+      container:
+        name: ""
+        image: docker.io/chaosnative/litmus-checker:2.13.0
+        args:
+          - -file=/tmp/chaosengine-pod-cpu-hog-xmv.yaml
+          - -saveName=/tmp/engine-name
+
+    - name: pod-delete-o2z
+      inputs:
+        artifacts:
+          - name: pod-delete-p2z
+            path: /tmp/chaosengine-pod-delete-p2z.yaml
+            raw:
+              data: |
+                apiVersion: litmuschaos.io/v1alpha1
+                kind: ChaosEngine
+                metadata:
+                  namespace: "{{workflow.parameters.adminModeNamespace}}"
+                  generateName: pod-delete-o2z
+                  labels:
+                    instance_id: 2760c483-64b6-4b65-a70d-368b72e7549b
+                    workflow_name: custom-chaos-workflow-1657185180
+                spec:
+                  appinfo:
+                    appns: boutique
+                    applabel: app=cartservice
+                    appkind: deployment
+                  engineState: active
+                  chaosServiceAccount: litmus-admin
+                  experiments:
+                    - name: pod-delete
+                      spec:
+                        components:
+                          env:
+                            - name: TOTAL_CHAOS_DURATION
+                              value: "30"
+                            - name: CHAOS_INTERVAL
+                              value: "10"
+                            - name: FORCE
+                              value: "false"
+                            - name: PODS_AFFECTED_PERC
+                              value: ""
+                        probe:
+                          - name: cart-pods-check
+                            type: cmdProbe
+                            mode: Edge
+                            runProperties:
+                              probeTimeout: 1000
+                              retry: 0
+                              interval: 1
+                              stopOnFailure: true
+                            cmdProbe/inputs:
+                              command: ./healthcheck -name pod-level
+                              source:
+                                image: chaosnative/go-runner:3.0.1-saas
+                                inheritInputs: true
+                              comparator:
+                                type: string
+                                criteria: contains
+                                value: "[P000]"
+                          - name: cart-svc-availability-check
+                            type: httpProbe
+                            mode: Continuous
+                            httpProbe/inputs:
+                              url: http://frontend.boutique.svc.cluster.local:80/cart
+                              insecureSkipVerify: false
+                              method:
+                                get:
+                                  criteria: ==
+                                  responseCode: "200"
+                            runProperties:
+                              probeTimeout: 2000
+                              interval: 5
+                              retry: 4
+                              probePollingInterval: 2
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
+                          - name: website-latency-check
+                            type: promProbe
+                            mode: Edge
+                            promProbe/inputs:
+                              endpoint: http://prometheus-k8s:9090
+                              query: avg_over_time(probe_duration_seconds{job=\"prometheus-blackbox-exporter\"}[60s:1s])*1000
+                              comparator:
+                                type: float
+                                criteria: <=
+                                value: "120"
+                            runProperties:
+                              probeTimeout: 5
+                              interval: 2
+                              retry: 2
+                              probePollingInterval: 1
+                              initialDelaySeconds: 1
+                              stopOnFailure: false
+      metadata:
+        labels:
+          weight: "10"
+      container:
+        name: ""
+        image: litmuschaos/litmus-checker:2.13.0
+        args:
+          - -file=/tmp/chaosengine-pod-delete-p2z.yaml
+          - -saveName=/tmp/engine-name
+    - name: cleanup-chaos-resources
+      container:
+        name: ""
+        image: litmuschaos/k8s:latest
+        command:
+          - sh
+          - -c
+        args:
+          - "kubectl delete chaosengine -l 'instance_id in
+            (2760c483-64b6-4b65-a70d-368b72e7549b, )' -n
+            {{workflow.parameters.adminModeNamespace}} "
+  entrypoint: custom-chaos
+  arguments:
+    parameters:
+      - name: adminModeNamespace
+        value: litmus
+  serviceAccountName: argo-chaos
+  podGC:
+    strategy: OnWorkflowCompletion
+  securityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
