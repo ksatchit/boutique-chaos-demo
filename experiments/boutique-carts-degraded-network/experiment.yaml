@@ -209,7 +209,6 @@ spec:
                     instance_id: 79ac430b-034f-42f0-a7d1-d3bb5209b85d
                     workflow_name: pod-network-latency-1658834015
                 spec:
-                  engineState: active
                   appinfo:
                     appns: boutique
                     applabel: app=cartservice
