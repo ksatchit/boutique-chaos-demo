@@ -21,7 +21,7 @@ spec:
             template: pod-cpu-hog-xmv
           - name: pod-io-stress-8zn
             template: pod-io-stress-8zn
-            
+
     - name: pod-cpu-hog-experiment
       inputs:
         artifacts:
