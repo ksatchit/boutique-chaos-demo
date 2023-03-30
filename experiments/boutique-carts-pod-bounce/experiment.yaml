@@ -236,7 +236,7 @@ spec:
                             type: httpProbe
                             mode: Continuous
                             httpProbe/inputs:
-                              url: http://frontend:80/cart
+                              url: http://frontend.boutique.svc.cluster.local:80/cart
                               insecureSkipVerify: false
                               method:
                                 get:
@@ -253,7 +253,7 @@ spec:
                             type: promProbe
                             mode: Edge
                             promProbe/inputs:
-                              endpoint: http://prometheus-k8s:9090
+                              endpoint: http://prometheus-k8s.monitoring.svc.cluster.local:9090
                               query: avg_over_time(probe_duration_seconds{job=\"prometheus-blackbox-exporter\", instance=\"frontend:80\"}[60s:1s])*1000
                               comparator:
                                 type: float
@@ -290,7 +290,7 @@ spec:
   arguments:
     parameters:
       - name: adminModeNamespace
-        value: litmus
+        value: hce
   serviceAccountName: argo-chaos
   podGC:
     strategy: OnWorkflowCompletion
