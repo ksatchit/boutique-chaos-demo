@@ -1,1 +1,1 @@
-# hub-workshop-2023
+# Chaos Demos on Online Boutique
